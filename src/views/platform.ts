@@ -153,10 +153,11 @@ function siteCard(env: Env, s: SiteRow): string {
 
 function quotaBox(q?: QuotaInfo): string {
   if (!q || !q.available) {
+    // 对外只展示额度规则，不暴露运维配置信息
     return `<div class="box">
-      <div class="box-name">今日额度</div>
+      <div class="box-name">免费额度</div>
       <div style="padding:14px 16px;font-size:12px;line-height:20px;color:#8a90a0">
-        额度统计未接入（需要 Cloudflare Analytics Token）。<br/>免费额度：10 万请求/天，UTC 0 点重置。
+        全平台共用 <b style="color:#3d434f">10 万请求 / 天</b>，UTC 0 点（北京时间 8 点）重置。<br/>访问量大时可能临时限流。
       </div>
     </div>`;
   }
