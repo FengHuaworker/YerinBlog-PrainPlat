@@ -2,6 +2,8 @@
 
 > 把 [Prain 清雨博客](https://prain.cn) 1.3.4 完整搬到 Cloudflare Workers，并做成多租户博客分发平台：
 > 注册一个子域，就得到一套带后台、评论、主题、fk 标记语言的博客，零服务器、零数据库运维。
+>
+> 只想要单个博客？用单站版：[Prain-for-CloudflareWorker](https://github.com/FengHuaworker/Prain-for-CloudflareWorker)
 
 - **平台**：`example.com`（根域）→ 注册 / 登录 / 控制台 / 目录 / 运维
 - **博客**：`<name>.example.com` → 独立的 Prain 实例（前台 + 后台）

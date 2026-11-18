@@ -2,7 +2,7 @@
 
 import schemaSql from '../schema.sql';
 import { buildHooks } from './lib/hooks';
-import { getConf, getIniAll, ensureInit, saveConf } from './lib/db';
+import { getConf, getIniAll, ensureInit, saveConf, siteOf } from './lib/db';
 import { getSite, resolveHost } from './lib/platform';
 import { classifyHost } from './lib/subdomain';
 import { notFoundPage } from './views/platform';
@@ -211,7 +211,7 @@ export class Ctx {
 
   async renderTheme(view: string, extra: AnyObj = {}): Promise<string> {
     const tpl = this.conf.tpl || 'default';
-    const ver = tpl === 'default' ? 'builtin' : (await this.env.KV.get(`tpl:ver:${tpl}`)) || '0';
+    const ver = tpl === 'default' ? 'builtin' : (await this.env.KV.get(`site:${siteOf(this.env)}:tpl:ver:${tpl}`)) || '0';
     let src = await loadThemeTemplate(this.env, tpl, view);
     if (src == null) src = BUILTIN_THEME[view] ?? null;
     if (src == null) src = BUILTIN_THEME['index'];
