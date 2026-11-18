@@ -201,3 +201,13 @@ src/
 MIT。上游 [prain.cn](https://prain.cn) 的版权声明保留在 [LICENSE](LICENSE) 中；本项目是在其 1.3.4 源码基础上做的 Workers 移植与多租户改造。
 
 主题、扩展、`public/` 下的静态资源版权归原作者所有。
+
+## 维护者备注
+
+本仓库的 `wrangler.toml` 是脱敏模板（占位 ID、`example.com`）。实际部署配置放在 `wrangler.prod.toml`（已 gitignore），命令：
+
+```bash
+npm run deploy:prod
+```
+
+直接 `npm run deploy` 会按模板部署，可能覆盖线上域名与绑定，别用错。

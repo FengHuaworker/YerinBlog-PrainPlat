@@ -1,3 +1,7 @@
+# 这是开源模板配置：ID 与域名都是占位符。
+# 本机生产部署请用 `npm run deploy:prod`（读取 wrangler.prod.toml，已被 .gitignore 忽略）。
+# 直接 `npm run deploy` 会按占位符部署，可能覆盖线上配置。
+
 name = "yerinblog"
 main = "src/index.ts"
 compatibility_date = "2025-05-01"
