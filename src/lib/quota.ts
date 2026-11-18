@@ -11,6 +11,12 @@ export interface QuotaInfo {
 }
 
 const LIMIT = 100000;
+/** 已用超过这个百分比就自动暂停注册（保留 20% 给已有博客） */
+export const QUOTA_LOW_PERCENT = 80;
+
+export function quotaLow(q: QuotaInfo | null | undefined): boolean {
+  return !!q && q.available && q.percent >= QUOTA_LOW_PERCENT;
+}
 const CACHE_KEY = 'platform:quota:v1';
 const CACHE_TTL = 600;
 

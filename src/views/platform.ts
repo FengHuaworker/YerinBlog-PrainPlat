@@ -2,7 +2,7 @@
 
 import { escapeHtml } from '../lib/util';
 import type { SiteRow } from '../lib/platform';
-import type { QuotaInfo } from '../lib/quota';
+import { QUOTA_LOW_PERCENT, type QuotaInfo } from '../lib/quota';
 
 const EXTRA_CSS = `
 .hero{padding:38px 34px;background:linear-gradient(120deg,#3E4454 0%,#48526e 55%,#5c6b90 100%);color:#fff;border-radius:4px}
@@ -96,12 +96,18 @@ ${opts.body}
 </html>`;
 }
 
-export function hero(env: Env, loggedIn: boolean): string {
+export function hero(env: Env, loggedIn: boolean, canRegister = true): string {
   return `<div class="box hero">
   <h1>写点干净的，<br/>剩下的交给平台。</h1>
   <p>${escapeHtml(platformName(env))} 把清雨博客（Prain）搬到 Cloudflare Workers：注册一个名字，立刻得到 <b>你的名字.${escapeHtml(baseDomain(env))}</b>，带后台、评论、主题和 fk 标记语言。也可以绑定自己的域名。</p>
   <div class="hero-tags"><span>无需服务器</span><span>免费</span><span>自带后台</span><span>支持自定义域名</span><span>数据在 D1</span></div>
-  ${loggedIn ? '<a class="btn btn-blue" href="/dashboard">进入控制台</a>' : '<a class="btn btn-blue" href="#create">创建我的博客</a>'}
+  ${
+    loggedIn
+      ? '<a class="btn btn-blue" href="/dashboard">进入控制台</a>'
+      : canRegister
+      ? '<a class="btn btn-blue" href="#create">创建我的博客</a>'
+      : '<a class="btn" href="/about">看一下额度说明</a>'
+  }
 </div>`;
 }
 
@@ -179,9 +185,16 @@ export function home(env: Env, site: string | null, total: number, recent: SiteR
   <div style="flex:1;min-width:0">
     ${announcement ? `<div class="notice blue" style="margin-bottom:15px">${escapeHtml(announcement)}</div>` : ''}
     ${!registration ? '<div class="notice" style="margin-bottom:15px">注册暂时关闭，仅管理员可以创建博客。</div>' : ''}
-    ${hero(env, !!site)}
+    ${registration && quota && quota.available && quota.percent >= QUOTA_LOW_PERCENT ? '<div class="notice" style="margin-bottom:15px">今天额度已用 ' + quota.percent + '%，为保障已有博客访问，注册暂时关闭，北京时间早上 8 点恢复。</div>' : ''}
+    ${hero(env, !!site, registration && !(quota?.available && quota.percent >= QUOTA_LOW_PERCENT))}
     <div style="height:15px"></div>
-    ${registerForm(env)}
+    ${
+      registration && !(quota?.available && quota.percent >= QUOTA_LOW_PERCENT)
+        ? registerForm(env)
+        : `<div class="box" id="create"><div class="box-name">创建博客</div><div style="padding:20px 18px"><div class="notice">${
+            !registration ? '注册暂时关闭，仅管理员可以创建博客。' : '今日额度接近上限，注册暂时关闭，北京时间早上 8 点恢复。'
+          }</div></div></div>`
+    }
     <div class="box">
       <div class="box-name">最新开通</div>
       ${recent.length ? recent.map((s) => siteCard(env, s)).join('') : '<div class="empty">还没有博客，来当第一个</div>'}

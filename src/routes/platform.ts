@@ -21,7 +21,7 @@ import { clientIp } from '../lib/session';
 import { normalizeSubdomain, platformRedirect, validateSubdomain } from '../lib/subdomain';
 import { escapeHtml, parseForm } from '../lib/util';
 import { getOpsConfig } from '../lib/ops';
-import { getQuota } from '../lib/quota';
+import { getQuota, quotaLow } from '../lib/quota';
 import { handleOps } from './ops';
 import { aboutPage, baseDomain, browsePage, dashboard, home, layout, loginPage, notFoundPage, platformName, promptPage } from '../views/platform';
 
@@ -101,6 +101,9 @@ export async function handlePlatform(req: Request, env: Env): Promise<Response> 
 
     const cfg = await getOpsConfig(env);
     if (!cfg.registration) return html(promptPage(env, site, '平台暂时关闭注册，请稍后再来', '/'), 403);
+    if (quotaLow(await getQuota(env))) {
+      return html(promptPage(env, site, '今天的 Worker 额度快用完了，注册暂时关闭，北京时间早上 8 点恢复', '/'), 403);
+    }
 
     const ip = clientIp(req);
     const dayAgo = Math.floor(Date.now() / 1000) - 86400;

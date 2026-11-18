@@ -211,7 +211,7 @@ export function opsOverviewPage(
           ? `<div class="qrow"><span>已用</span><b>${q.used.toLocaleString('en-US')} / 100,000</b></div>
              <div class="qbar"><i style="width:${Math.max(2, q.percent)}%;background:${qcolor}"></i></div>
              <div class="qrow"><span>剩余</span><b style="color:${qcolor}">${q.remaining.toLocaleString('en-US')}</b></div>
-             <div class="num" style="margin-top:8px;font-size:12px">全平台共用 · 数据延迟约 1–2 分钟</div>`
+             <div class="num" style="margin-top:8px;font-size:12px">全平台共用 · 数据延迟约 1–2 分钟 · 已用超过 80% 自动暂停注册</div>`
           : `<div class="num" style="line-height:20px">额度统计未接入。执行 <span class="mono">npx wrangler secret put CF_ANALYTICS_TOKEN</span> 并填入只读 Analytics Token 后生效。<br/>免费额度 10 万请求/天。</div>`
       }
     </div>
