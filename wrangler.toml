@@ -1,0 +1,45 @@
+name = "yerinblog"
+main = "src/index.ts"
+compatibility_date = "2025-05-01"
+workers_dev = true
+
+# 平台根域 + 所有一级子域都进这个 Worker
+# 把 example.com 换成你自己的域名后再取消注释
+# routes = [
+#   { pattern = "example.com/*", zone_name = "example.com" },
+#   { pattern = "*.example.com/*", zone_name = "example.com" }
+# ]
+
+
+# 静态资源：lib/style、tpl/default/style|img、ext 图标等
+# 关键：false = 命中 public/ 里的静态文件时，不调用 Worker，也不计 Worker 请求
+# 只有动态路径（页面、/db/upload、已安装主题的 KV 文件）才进 Worker
+assets = { directory = "public", binding = "ASSETS", run_worker_first = false }
+
+# 模板文件以文本模块打包进 Worker
+[[rules]]
+type = "Text"
+globs = ["**/*.html", "**/*.sql"]
+fallthrough = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "yerinblog"
+# 本地开发可用占位值；部署前替换为 wrangler d1 create prain 返回的 uuid
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[[kv_namespaces]]
+binding = "KV"
+# 同上：部署前替换为 wrangler kv namespace create PRRAIN 返回的 id
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+[vars]
+PRAIN_ENV = "worker"
+# 平台根域：根域 = 控制面，<name>.root = 博客
+BASE_DOMAIN = "example.com"
+PLATFORM_NAME = "YerinBlog"
+# 额度统计（可选）：填账号 ID 并 wrangler secret put CF_ANALYTICS_TOKEN
+# CF_ACCOUNT_ID = "your-account-id"
+
+[observability]
+enabled = true

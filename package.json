@@ -1,0 +1,20 @@
+{
+  "name": "yerinblog",
+  "version": "1.3.4",
+  "private": true,
+  "description": "YerinBlog - 基于 Prain 的多租户博客分发平台（Cloudflare Workers + D1 + KV）",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy -c wrangler.prod.toml",
+    "typecheck": "tsc --noEmit",
+    "db:local": "wrangler d1 execute prain --local --file=schema.sql",
+    "db:remote": "wrangler d1 execute prain --remote --file=schema.sql",
+    "migrate": "node scripts/migrate-php.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261113.1",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.0.0"
+  }
+}

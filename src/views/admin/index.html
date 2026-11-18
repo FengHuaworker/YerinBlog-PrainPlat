@@ -1,0 +1,115 @@
+{include header}
+<div class="headline">网站首页</div>
+<!-- hook.admin_index_header -->
+<!-- hook.admin_index_system -->
+<div class="title">系统信息</div>
+<div class="info">
+	<!-- hook.admin_index_system_top -->
+	<div class="info-item">总文章：<span>{$conf.article.count}</span></div>
+	<div class="info-item">总评论：<span>{$conf.comment.count}</span></div>
+	<div class="info-item">总浏览：<span>{$conf.views}</span></div>
+	<!-- hook.admin_index_info_top -->
+	<div class="info-item">当前系统版本：<span>{#V}</span></div>
+	<div class="info-item">当前数据库版本：<span>{$conf.db.version}</span></div>
+	<!-- hook.admin_index_info_bottom -->
+	<a href="javascript:checkUpdate()" class="blue a-line">检查更新</a>
+	<a href="javascript:systemSync()" class="blue a-line">系统同步</a>
+	<a href="javascript:dbSync()" class="blue a-line">数据库版本同步</a>
+	<script>
+		function dbSync(){
+			SX.alert({
+				content:`数据库版本将与官方最新版本同步，同步之前，请做好数据备份哦，以免更新失败造成数据丢失！是否同步？`,
+				btn:['拒绝','立即同步'],
+				yes(){
+					SX.pop('同步中，请稍等...',0);
+					SX.ajax('{url admin/dbUpdate}').then(res=>{
+						if(res.error){
+							SX.pop('同步失败');
+						}else{
+							SX.pop('同步成功',()=>{
+								location.reload();
+							});
+						}
+					})
+				}
+			})
+		}
+		function systemSync(){
+			SX.alert({
+				content:`Worker 版通过重新部署来更新系统，是否查看部署说明？`,
+				btn:['取消','查看说明'],
+				yes(){
+					location.href='https://developers.cloudflare.com/workers/wrangler/commands/#deploy';
+				}
+			})
+		}
+		function checkUpdate(a){
+			SX.ajax('{url admin/checkUpdate}').then(res=>{
+				if(res.error){
+					SX.pop(res.error);
+				}else{
+					if(res.data){
+						SX.alert({
+							content:`清雨已有新版本<strong>${res.data}</strong>，当前 Worker 版基于 v{#V} 移植，请关注移植仓库更新。`,
+							btn:['知道了']
+						})
+					}else{
+						if(!a) SX.alert('您的版本已是最新，无需更新！');
+					}
+				}
+			})
+		}
+	</script>
+	{if $_SESSION.updateAlert}<script>checkUpdate(1);</script>{/if}
+	<!-- hook.admin_index_system_bottom -->
+</div>
+<!-- hook.admin_index_news -->
+<div class="title">官网动态</div>
+<div class="border index-news">暂无</div>
+<script>
+	SX.ajax('{#API_HOST}getNews').then(res=>{
+		if(!res.error && res.data){
+			SX('.index-news').html(res.data);
+		}
+	}).catch(()=>{});
+</script>
+<!-- hook.admin_index_server -->
+<div class="title">运行信息 · <a href="{url admin/error}" class="blue">错误日志</a> · <a href="{url admin/config}" class="blue" target="_blank">查看config</a> · <a href="{url admin/phpinfo}" class="blue" target="_blank">运行环境</a></div>
+<div class="table nowrap">
+	<table>
+		<!-- hook.admin_index_server_top -->
+		<tr>
+			<td class="text-right">站点域名</td>
+			<td class="text-left">{$host}</td>
+			<td class="text-right">当前您的IP地址</td>
+			<td class="text-left">{#ip()}</td>
+		</tr>
+		<tr>
+			<td class="text-right">运行平台</td>
+			<td class="text-left">Cloudflare Workers</td>
+			<td class="text-right">数据中心</td>
+			<td class="text-left">{#COLO}</td>
+		</tr>
+		<tr>
+			<td class="text-right">服务器时间</td>
+			<td class="text-left">{#date('Y-m-d H:i:s',time())}</td>
+			<td class="text-right">运行时</td>
+			<td class="text-left">V8 Isolates</td>
+		</tr>
+		<tr>
+			<td class="text-right">数据存储</td>
+			<td class="text-left">D1 (SQLite) + KV</td>
+			<td class="text-right">数据库版本</td>
+			<td class="text-left">{$conf.db.version}</td>
+		</tr>
+		<tr>
+			<td class="text-right">上传单文件上限</td>
+			<td class="text-left">25 MB (KV)</td>
+			<td class="text-right">当前模式</td>
+			<td class="text-left">{if DEBUG==0}线上模式（无错）{elseif DEBUG==1}调试模式（无错+日志）{elseif DEBUG==2}开发模式（报错+日志）{/if}</td>
+		</tr>
+		<!-- hook.admin_index_server_bottom -->
+	</table>
+</div>
+<!-- hook.admin_index_footer -->
+{include footer}

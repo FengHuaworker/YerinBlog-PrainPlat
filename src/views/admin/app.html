@@ -1,0 +1,34 @@
+{include header}
+<div class="headline">应用中心</div>
+<div class="tip">Worker 版应用中心支持导入 / 导出本地应用，官方应用市场请访问 <a href="https://prain.cn" target="_blank" class="blue">prain.cn</a></div>
+<div class="title">已安装主题</div>
+<ul class="tpl">
+{foreach $tpl.list}
+	<li>
+		<div class="tpl-icon"><img src="{$item.icon}"/></div>
+		<div class="tpl-info">
+			<div class="tpl-name">{$item.name}<span class="tpl-version">v{$item.version}</span></div>
+			<div class="tpl-operate">
+				{if $conf.tpl == $item.id}<span class="tpl-use">使用中</span>{else}<a class="tpl-btn" href="{url admin/tpl/install/$item.id}" data-pjax="false">使用</a>{/if}
+				<a href="{url admin/tpl/download/$item.id}" data-pjax="false" class="tpl-btn bg-purple">导出</a>
+			</div>
+		</div>
+	</li>
+{/foreach}
+</ul>
+<div class="title">已安装扩展</div>
+<ul class="ext">
+{foreach $ext.list}
+	<li class="ext-install">
+		<div class="ext-icon"><img src="{$item.icon}"/></div>
+		<div class="ext-info">
+			<div class="ext-name">{$item.name}<span class="ext-version">v{$item.version}</span>
+				<a href="{url admin/ext/download/$item.id}" data-pjax="false" class="tpl-btn bg-purple">导出</a>
+			</div>
+			<div class="ext-intro">{$item.intro}</div>
+		</div>
+	</li>
+{/foreach}
+</ul>
+<div class="tip">导入方式：在「主题管理 / 扩展管理」中点击导入，选择 .sx 应用包。</div>
+{include footer}
