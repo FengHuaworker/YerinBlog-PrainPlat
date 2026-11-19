@@ -13,6 +13,14 @@
 ![平台首页](docs/platform-home.png)
 ![子域博客](docs/tenant-home.png)
 
+## 在线演示
+
+- 平台首页：https://prain.yerinblog.cc.cd
+- 运维面板：`/ops`（**仅前端演示站，后台对访客关闭**，需要解锁后登录）
+- 单站版演示：https://prainblog.yerinblog.cc.cd
+
+> 演示站只开放前台浏览，`/admin` 与 `/ops` 对普通访客返回 404，避免被当成公共后台使用。
+
 ## 功能
 
 ### 平台

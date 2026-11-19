@@ -295,12 +295,58 @@ function isStaticPath(pathname: string): boolean {
   );
 }
 
+
+/** 演示站守卫：只开放前台。后台（/admin、?admin/...、/ops）需先用 ?demo=KEY 解锁 */
+const DEMO_COOKIE = 'prain_demo';
+
+function demoGuard(req: Request, env: any): Response | null {
+  const key = env.DEMO_ADMIN_KEY as string | undefined;
+  if (!key) return null;
+  const url = new URL(req.url);
+
+  const given = url.searchParams.get('demo');
+  if (given === key) {
+    const clean = new URL(url.toString());
+    clean.searchParams.delete('demo');
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: clean.pathname + (clean.search || ''),
+        'Set-Cookie': `${DEMO_COOKIE}=${key}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`,
+      },
+    });
+  }
+
+  const isAdminPath = url.pathname === '/admin' || url.pathname.startsWith('/admin/');
+  const isAdminQuery = Array.from(url.searchParams.keys()).some((k) => k === 'admin' || k.startsWith('admin/'));
+  const isOps = url.pathname === '/ops' || url.pathname.startsWith('/ops/');
+  if (!isAdminPath && !isAdminQuery && !isOps) return null;
+
+  const cookie = req.headers.get('Cookie') || '';
+  const ok = cookie.split(';').some((c) => c.trim() === `${DEMO_COOKIE}=${key}`);
+  if (ok) return null;
+
+  return new Response(
+    '<!doctype html><meta charset="utf-8"><title>404 Not Found</title>' +
+      '<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f7f8fb;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#3d434f">' +
+      '<div style="font-size:72px;font-weight:300;letter-spacing:.04em">404</div>' +
+      '<div style="margin-top:8px;color:#8a90a0">页面不存在</div>' +
+      '<a href="/" style="margin-top:24px;color:#5b6fd6;text-decoration:none">返回首页</a></div>',
+    { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+  );
+}
+
 export async function handleRequest(req: Request, env: Env, _ctx?: ExecutionContext): Promise<Response> {
   const url = new URL(req.url);
+  const guarded = demoGuard(req, env);
+  if (guarded) return guarded;
   const pathname = url.pathname;
   const host = url.hostname.toLowerCase();
   const base = (env.BASE_DOMAIN || 'example.com').toLowerCase();
   const info = classifyHost(host, base);
+  // 允许平台控制面挂在指定子域（演示站 prain.* 用；正式站不设置此变量）
+  const platformHost = String((env as any).PLATFORM_HOST || '').toLowerCase();
+  const isPlatformHost = !!platformHost && host === platformHost;
   // 本地调试 / workers.dev 预览一律走平台
   const isLocal =
     host === 'localhost' ||
@@ -311,7 +357,7 @@ export async function handleRequest(req: Request, env: Env, _ctx?: ExecutionCont
     host.endsWith('.workers.dev');
 
   // 保留名（admin / my / dashboard …）统一 302 回平台根域
-  if (info.kind === 'reserved') {
+  if (info.kind === 'reserved' && !isPlatformHost) {
     const target = `https://${base}${url.pathname === '/' ? '/' : url.pathname}${url.search}`;
     return new Response(null, { status: 302, headers: { Location: target } });
   }
@@ -321,7 +367,7 @@ export async function handleRequest(req: Request, env: Env, _ctx?: ExecutionCont
     await ensureSchema(env);
 
     // 平台控制面（根域 / 本地调试）
-    if (info.kind === 'platform' || isLocal) {
+    if (info.kind === 'platform' || isPlatformHost || isLocal) {
       return await handlePlatform(req, env);
     }
 
