@@ -6,3 +6,5 @@ import.sql
 wrangler.prod.toml
 .env
 *.local
+wrangler.demo.toml
+*.demo.toml
